@@ -70,7 +70,7 @@
         <input id="lastname" pInputText [(ngModel)]="user.lastname" required/>
         <small class="p-invalid" *ngIf="submitted && !user.lastname">Lastname is required.</small>
       </div>
-      <div class="p-field" *ngIf="!creationMode">
+      <div class="p-field" *ngIf="creationMode">
         <label for="email">Email</label>
         <input id="email" pInputText [(ngModel)]="user.email" required/>
         <small class="p-invalid" *ngIf="submitted && !user.email">Email is required.</small>

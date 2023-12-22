@@ -44,12 +44,12 @@ export class AppComponent {
     this.user = {};
     this.submitted = false;
     this.userDialog = true;
-    this.creationMode = false;
+    this.creationMode = true;
   }
 
   editUser(user: User) {
     this.user = {...user};
-    this.creationMode = true;
+    this.creationMode = false;
     this.userDialog = true;
   }
 
@@ -81,6 +81,7 @@ export class AppComponent {
       this.userService.createUser(this.user).subscribe(data => {
           this.user = data;
           this.users.push(this.user);
+          this.users = [...this.users];
           this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 4000});
           this.router.navigate(['/'])
         },
@@ -93,6 +94,7 @@ export class AppComponent {
         .subscribe(data => {
             this.user = data;
             this.users[this.findIndexById(this.user.id)] = this.user;
+            this.users = [...this.users];
             this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Updated', life: 4000});
             this.router.navigate(['/'])
           },
@@ -102,7 +104,6 @@ export class AppComponent {
         );
     }
 
-    this.users = [...this.users];
     this.userDialog = false;
     this.user = {};
   }
