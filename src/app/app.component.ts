@@ -3,7 +3,6 @@ import { User } from './user';
 import { UserService } from './user-service';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
-import {response} from 'express';
 import {Router} from '@angular/router';
 
 @Component({
@@ -12,8 +11,10 @@ import {Router} from '@angular/router';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Simple user manager application';
+  title = 'Dalloz simple user manager application';
   userDialog: boolean;
+
+  creationMode = true;
 
   users: User[];
 
@@ -43,10 +44,12 @@ export class AppComponent {
     this.user = {};
     this.submitted = false;
     this.userDialog = true;
+    this.creationMode = false;
   }
 
   editUser(user: User) {
     this.user = {...user};
+    this.creationMode = true;
     this.userDialog = true;
   }
 
@@ -59,6 +62,9 @@ export class AppComponent {
         this.users = this.users.filter(val => val.id !== user.id);
         this.user = {};
         this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Deleted', life: 3000});
+        this.userService.deleteUser(user.id).subscribe(data => {
+          //do nothing
+        });
       }
     });
   }
@@ -70,26 +76,35 @@ export class AppComponent {
 
   saveUser() {
     this.submitted = true;
-    this.userService.updateUser(this.user)
-      .subscribe(data => {
+
+    if(this.creationMode) {
+      this.userService.createUser(this.user).subscribe(data => {
+          this.user = data;
+          this.users.push(this.user);
+          this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 4000});
           this.router.navigate(['/'])
+        },
+        error => {
+          this.messageService.add({severity:'failure', summary: 'Failure', detail: 'User creation failed : ' + error, life: 4000});
         }
       );
-
-    if (this.user.id) {
-        this.users[this.findIndexById(this.user.id)] = this.user;
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Updated', life: 3000});
-    }
-    else {
-      this.user.id = this.createId();
-      this.users.push(this.user);
-      this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 3000});
+    } else {
+      this.userService.updateUser(this.user)
+        .subscribe(data => {
+            this.user = data;
+            this.users[this.findIndexById(this.user.id)] = this.user;
+            this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Updated', life: 4000});
+            this.router.navigate(['/'])
+          },
+          error => {
+            this.messageService.add({severity:'failure', summary: 'Failure', detail: 'User Update failed : '+error, life: 4000});
+          }
+        );
     }
 
     this.users = [...this.users];
     this.userDialog = false;
     this.user = {};
-
   }
 
   findIndexById(id: string): number {
@@ -102,14 +117,5 @@ export class AppComponent {
     }
 
     return index;
-  }
-
-  createId(): string {
-    let id = '';
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for ( var i = 0; i < 5; i++ ) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
   }
 }

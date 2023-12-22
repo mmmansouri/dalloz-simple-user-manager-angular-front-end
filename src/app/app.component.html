@@ -24,7 +24,7 @@
           <h5 class="p-m-0">Manage Users</h5>
           <span class="p-input-icon-left">
                     <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dt.filterGlobal($event.target, 'contains')" placeholder="Search..." />
+                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Search..." />
                 </span>
         </div>
       </ng-template>
@@ -70,7 +70,7 @@
         <input id="lastname" pInputText [(ngModel)]="user.lastname" required/>
         <small class="p-invalid" *ngIf="submitted && !user.lastname">Lastname is required.</small>
       </div>
-      <div class="p-field" *ngIf="!user.email">
+      <div class="p-field" *ngIf="!creationMode">
         <label for="email">Email</label>
         <input id="email" pInputText [(ngModel)]="user.email" required/>
         <small class="p-invalid" *ngIf="submitted && !user.email">Email is required.</small>
@@ -79,7 +79,7 @@
 
     <ng-template pTemplate="footer">
       <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
+      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" [disabled]="!(user.firstname && user.lastname && user.email)" (click)="saveUser()"></button>
     </ng-template>
   </p-dialog>
 
