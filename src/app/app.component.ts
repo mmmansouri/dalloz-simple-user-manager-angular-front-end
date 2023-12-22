@@ -4,6 +4,7 @@ import { UserService } from './user-service';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
 import {response} from 'express';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,8 @@ export class AppComponent {
 
   submitted: boolean;
 
-  constructor(private userService: UserService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
+  constructor(private userService: UserService, private messageService: MessageService, private confirmationService: ConfirmationService,
+              private router: Router) { }
 
   ngOnInit() {
     this.userService.getUsers().subscribe( response => {
@@ -68,19 +70,25 @@ export class AppComponent {
 
   saveUser() {
     this.submitted = true;
-      if (this.user.id) {
+    this.userService.updateUser(this.user)
+      .subscribe(data => {
+          this.router.navigate(['/'])
+        }
+      );
+
+    if (this.user.id) {
         this.users[this.findIndexById(this.user.id)] = this.user;
         this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Updated', life: 3000});
-      }
-      else {
-        this.user.id = this.createId();
-        this.users.push(this.user);
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 3000});
-      }
+    }
+    else {
+      this.user.id = this.createId();
+      this.users.push(this.user);
+      this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 3000});
+    }
 
-      this.users = [...this.users];
-      this.userDialog = false;
-      this.user = {};
+    this.users = [...this.users];
+    this.userDialog = false;
+    this.user = {};
 
   }
 
