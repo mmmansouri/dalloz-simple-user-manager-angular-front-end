@@ -1,8 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Product } from './product';
-import { ProductService } from './productservice';
+import { User } from './user';
+import { UserService } from './user-service';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
+import {response} from 'express';
 
 @Component({
   selector: 'app-root',
@@ -10,90 +11,83 @@ import { MessageService } from 'primeng/api';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'simple-user-manager-angular-front';
-  productDialog: boolean;
+  title = 'Simple user manager application';
+  userDialog: boolean;
 
-  products: Product[];
+  users: User[];
 
-  product: Product;
+  user: User;
 
-  selectedProducts: Product[];
+  selectedUsers: User[];
 
   submitted: boolean;
 
-  constructor(private productService: ProductService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
+  constructor(private userService: UserService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
 
   ngOnInit() {
-    this.productService.getProducts().then(data => this.products = data);
-  }
-
-  openNew() {
-    this.product = {};
-    this.submitted = false;
-    this.productDialog = true;
-  }
-
-  deleteSelectedProducts() {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the selected products?',
-      header: 'Confirm',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.products = this.products.filter(val => !this.selectedProducts.includes(val));
-        this.selectedProducts = null;
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'Products Deleted', life: 3000});
-      }
+    this.userService.getUsers().subscribe( response => {
+      this.users = response.map( item => {
+        return new User(
+          item.id,
+          item.firstname,
+          item.lastname,
+          item.email
+        );
+      });
     });
   }
 
-  editProduct(product: Product) {
-    this.product = {...product};
-    this.productDialog = true;
+  openNew() {
+    this.user = {};
+    this.submitted = false;
+    this.userDialog = true;
   }
 
-  deleteProduct(product: Product) {
+  editUser(user: User) {
+    this.user = {...user};
+    this.userDialog = true;
+  }
+
+  deleteUser(user: User) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + product.name + '?',
+      message: 'Are you sure you want to delete ' + user.firstname + ' '+ user.lastname + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.products = this.products.filter(val => val.id !== product.id);
-        this.product = {};
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
+        this.users = this.users.filter(val => val.id !== user.id);
+        this.user = {};
+        this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Deleted', life: 3000});
       }
     });
   }
 
   hideDialog() {
-    this.productDialog = false;
+    this.userDialog = false;
     this.submitted = false;
   }
 
-  saveProduct() {
+  saveUser() {
     this.submitted = true;
-
-    if (this.product.name.trim()) {
-      if (this.product.id) {
-        this.products[this.findIndexById(this.product.id)] = this.product;
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'Product Updated', life: 3000});
+      if (this.user.id) {
+        this.users[this.findIndexById(this.user.id)] = this.user;
+        this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Updated', life: 3000});
       }
       else {
-        this.product.id = this.createId();
-        this.product.image = 'product-placeholder.svg';
-        this.products.push(this.product);
-        this.messageService.add({severity:'success', summary: 'Successful', detail: 'Product Created', life: 3000});
+        this.user.id = this.createId();
+        this.users.push(this.user);
+        this.messageService.add({severity:'success', summary: 'Successful', detail: 'User Created', life: 3000});
       }
 
-      this.products = [...this.products];
-      this.productDialog = false;
-      this.product = {};
-    }
+      this.users = [...this.users];
+      this.userDialog = false;
+      this.user = {};
+
   }
 
   findIndexById(id: string): number {
     let index = -1;
-    for (let i = 0; i < this.products.length; i++) {
-      if (this.products[i].id === id) {
+    for (let i = 0; i < this.users.length; i++) {
+      if (this.users[i].id === id) {
         index = i;
         break;
       }
